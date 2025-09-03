@@ -49,28 +49,36 @@ I used pytest for the automated tests. Once you've set it up locally, just run t
 pytest
 
 
-The Rules I Implemented
+The Rules I Chose
 
-The brief asked me to choose 2-3 rules from the policy docs. I went with these because they seemed like the most practical and impactful checks I could build reliably.
+The brief asked for 2-3 rules from the policy docs. My thinking was to pick a few that would have a real impact and could be built reliably.
 
-1. File Size Limit (10MB):
-This was a hard technical requirement from the Global Outdoor guidelines. If a file is too big for their ad servers, it's an automatic REJECT.
+1. File Size Limit (10MB)
 
-2. 16:9 Aspect Ratio:
-The same document mentioned 16:9 for digital screens. I check for this to catch distorted images, but I made it a REQUIRES_REVIEW since other formats might still be okay in some cases.
+Source: Global Outdoor Copy Approval Guidelines
 
-3. Low Contrast:
-To act as a proxy for legibility (from the ASA code), I built a simple check to flag images that are low-contrast or "washed out." This also triggers a REQUIRES_REVIEW.
+Justification: This was a technical requirement from their guidelines. If a file is too big for the ad servers, it's not going to work, so this is an immediate REJECT.
 
+2. 16:9 Aspect Ratio
 
-My Design Choices
+Source: Global Outdoor Copy Approval Guidelines
 
-My main goal was to build a solid, well-tested solution that fit the ~2 hour scope. This meant making some pragmatic choices.
-- Simplifications:
-My contrast check uses a simple standard deviation calculation. It's a quick and effective way to get a result without adding heavy dependencies or complex image analysis. It gets the job done.
+Justification: The same document mentioned 16:9 for digital screens. I check for this to catch distorted images, but I made it a REQUIRES_REVIEW since other formats might still be valid in some contexts.
 
-- Optional Features:
-I decided to add the optional features because they make the project feel more complete. The improved OpenAPI docs make the API easier to use, and the /metrics endpoint is a good first step towards real-world monitoring.
+3. Low Contrast
 
-- If I Had More Time:
-The first thing I'd do is move the rule thresholds (like the contrast value) into a config file or environment variables so they aren't hard-coded. After that, I would add structured logging for every decision the API makes.
+Source: ASA CAP Code (UK)
+
+Justification: The ASA code talks a lot about clarity. To act as a proxy for legibility, I built a simple check to flag images that are "washed out." This also triggers a REQUIRES_REVIEW for a human to make the final call.
+
+Design Decisions & Trade-offs
+
+My main goal was to build a solution that respected the ~2 hour scope. That meant being practical from the start.
+
+My core design decision was to keep the rules engine predictable. I focused on measurable rules from the documents, rather than trying to interpret vague concepts that would need ML. This approach keeps the service simple.
+
+The main trade-off was with the contrast check. A truly accurate "legibility" detector is complex, so I chose a simple standard deviation heuristic. It's a pragmatic simplification that effectively flags the most obvious cases and keeps the service easy to maintain.
+
+I decided to add an optional feature of metrics, as they make the API more professional. The /metrics endpoint is a simple way to monitor the service.
+
+What I’d do next: The first thing I'd do is move the rule thresholds (e.g., LOW_CONTRAST_THRESHOLD) from hard-coded values into a config file or environment variables. That would make the service more flexible. After that, I would add structured logging for each decision.
